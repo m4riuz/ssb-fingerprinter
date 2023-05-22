@@ -1,0 +1,45 @@
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta charset="UTF-8" />
+    <title>SSB Finterprinter</title>
+</head>
+<body>
+    <h1>SSB Fingerprinter</h1>
+    <script>
+        var data = {features: "", userAgent: navigator.userAgent, platform: navigator.platform};
+
+        function check(name, func) {
+            var result = false;
+            try {
+                result = func();
+            }
+            catch(err) {};
+            data[name] = result;
+        }
+
+        check("chrome", function() { return !!window.chrome });
+        check("opera", function() { return !!window.opera });
+        check("netscape", function() { return !!window.netscape });
+        check("safari", function() { return !!window.safari });
+        check("old_ie", function() { return !!window.attachEvent && !window.addEventListener });
+
+        check("ie_like", function() { return /*@cc_on!@*/false || !!document.documentMode });
+        check("safari_like", function() { return !!window.safari });
+        check("mozilla_like", function() { return !!window.Components || typeof InstallTrigger !== 'undefined' });
+        check("chrome_like", function() { return !((!(/*@cc_on!@*/false || !!document.documentMode) && !!window.StyleMedia) || top.msCredentials) && (!!window.chrome || /Chrome/.test(navigator.userAgent) || /Google/i.test(navigator.vendor))});
+        check("opera_like", function() { return (!!window.opr && !!opr.addons) || (!!window.opera && window.opera.toString() === "[object Opera]")});
+        check("edge_like", function() { return (!(/*@cc_on!@*/false || !!document.documentMode) && !!window.StyleMedia) || top.msCredentials });
+
+        var globals = <%- features %>
+        for (var i in globals) {
+            data.features += globals[i] in window ? "1" : "0";
+        }
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/");
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.send(JSON.stringify(data));
+    </script>
+    </body>
+</html>
